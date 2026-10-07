@@ -30,7 +30,7 @@ function formFrom(a, session, program) {
     return {
       mode: "ongoing", program, pic: session?.name || "", name: "", date: "", phase: "", location: "",
       participants: [newPeserta({ category: "SMA" }), newPeserta({ category: "Universitas" })],
-      hr: [newSdm()], issues: [], achievementValue: "", feedback: "", progress: "",
+      hr: [newSdm()], issues: [], achievementValue: "", feedback: "", progress: "", isDone: false,
     };
   }
   return {
@@ -39,7 +39,7 @@ function formFrom(a, session, program) {
     participants: a.participants?.length ? a.participants.map(newPeserta) : [newPeserta()],
     hr: a.humanResources?.length ? a.humanResources.map(newSdm) : [newSdm()],
     issues: (a.issues || []).map(newIssue),
-    achievementValue: a.achievementValue ?? "", feedback: a.feedback ?? "", progress: a.progress || "",
+    achievementValue: a.achievementValue ?? "", feedback: a.feedback ?? "", progress: a.progress || "", isDone: !!a.isDone,
   };
 }
 
@@ -100,6 +100,7 @@ function buildPatch(f, a) {
   if (f.date !== toDateInput(a.date)) body.date = fromDateInput(f.date);
   set("phase", f.phase || null, a.phase);
   set("location", f.location.trim() || null, a.location);
+  set("isDone", f.isDone, !!a.isDone);
   if (f.mode === "ongoing") {
     Object.assign(body, lists(f));
     set("achievementValue", numOrNull(f.achievementValue), a.achievementValue);
@@ -156,7 +157,9 @@ export function ActivityForm({ open, activity, defaultProgram, initialMode, onCl
         if (Object.keys(body).length) await api("/activity/" + activity.id, { method: "PATCH", body });
         toast("Perubahan kegiatan disimpan.");
       } else {
-        await api("/activity", { method: "POST", body: buildCreate(f) });
+        const out = await api("/activity", { method: "POST", body: buildCreate(f) });
+        // backend hanya menerima isDone saat ubah, jadi status selesai dikirim setelah kegiatan dibuat
+        if (f.isDone) await api("/activity/" + out.data.activityId, { method: "PATCH", body: { isDone: true } });
         toast(`"${f.name.trim()}" ditambahkan.`);
       }
       invalidate("/activities", "/dashboard");
@@ -208,6 +211,18 @@ export function ActivityForm({ open, activity, defaultProgram, initialMode, onCl
           </label>
           <label className="field span-2"><span className="field-lab">Lokasi / alamat</span>
             <input type="text" placeholder="mis. Aula Barat ITB atau Daring" {...field("location")} />
+          </label>
+        </div>
+
+        <div className="form-sec">
+          <span className="field-lab">Status</span>
+          <label className={"check done-check" + (f.isDone ? " on" : "")}>
+            <input type="checkbox" checked={f.isDone} onChange={(e) => set({ isDone: e.target.checked })} />
+            <span><b>Tandai selesai</b>
+              <small>{f.isDone
+                ? "Kegiatan dihitung Selesai, apa pun tanggalnya."
+                : "Tanpa tanda ini, status mengikuti tanggal: Akan Datang sebelum H-2, Berlangsung H-2 sampai H+7, Selesai setelahnya."}</small>
+            </span>
           </label>
         </div>
 

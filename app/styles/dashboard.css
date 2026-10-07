@@ -136,6 +136,14 @@ a{color:var(--blue-ink);text-underline-offset:3px}
 .kpi.t-done .kpi-val{color:var(--ok-ink)}
 .kpi.t-neg .kpi-val{color:var(--crit-ink)}
 .kpi .meter{margin-top:6px}
+.progress-card{display:grid;grid-template-columns:minmax(180px,240px) minmax(0,1fr);gap:0;padding:0}
+.pc-progress{display:flex;flex-direction:column;gap:6px;padding:18px 20px;border-right:1px solid var(--line)}
+.pc-val{font-size:40px;font-weight:800;color:var(--navy);line-height:1.05;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.pc-progress .meter{height:8px;margin-top:4px}
+.pc-last{display:flex;flex-direction:column;gap:6px;padding:18px 20px;min-width:0}
+.pc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.pc-head .row-link{font-size:15.5px}
+.pc-desc{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink-2);max-width:80ch}
 
 .meter{display:block;height:6px;background:#E6ECF4;border-radius:6px;overflow:hidden;min-width:40px}
 .meter>span{display:block;height:100%;background:var(--blue);border-radius:6px}
@@ -252,6 +260,11 @@ input[type=number]{font-variant-numeric:tabular-nums}
 .check-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .check{display:flex;align-items:center;gap:8px;border:1px solid var(--line-2);border-radius:var(--r-sm);padding:7px 10px;font-size:13px;cursor:pointer}
 .check.on{border-color:var(--blue);background:var(--pale);color:var(--navy);font-weight:600}
+.done-check{align-items:flex-start;gap:10px;padding:10px 12px;align-self:stretch}
+.done-check input{margin-top:2px}
+.done-check b{display:block;font-size:13.5px}
+.done-check small{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-top:2px}
+.done-check.on small{color:var(--ink-2)}
 .hint{font-size:12.5px;color:var(--muted);margin:0;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .form{display:flex;flex-direction:column;gap:22px}
 .form-sec{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;min-width:0}
@@ -656,6 +669,9 @@ dialog.confirm[open]{animation:pop .2s var(--ease)}
   .kpi-val{font-size:22px}
   .gantt-scale,.gantt-row{grid-template-columns:120px minmax(0,1fr)}
   .metric-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .progress-card{grid-template-columns:minmax(0,1fr)}
+  .pc-progress{border-right:0;border-bottom:1px solid var(--line);padding:16px}
+  .pc-last{padding:16px}
   .stat-row{grid-template-columns:repeat(2,minmax(0,1fr))}
   .filter-bar .field{max-width:none}
 }

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { data } from "react-router";
 import { RequireAccess } from "../../components/Access.jsx";
-import { ActivitiesTable, useActivityActions } from "../../components/Activities.jsx";
+import { ActivitiesTable, ActivityDetail, useActivityActions } from "../../components/Activities.jsx";
 import { ActivityForm } from "../../components/ActivityForm.jsx";
 import { Gantt } from "../../components/Gantt.jsx";
 import { Icon } from "../../components/Icon.jsx";
-import { ErrorNote, Kpi, PageHead, ProgramAbout, SkeletonCard, Spinner } from "../../components/ui.jsx";
-import { canEditActivity, fmtDate, fmtNum, phaseLabel, programByKey, PROG_COLORS } from "../../lib/format.js";
+import { Bar, ErrorNote, PageHead, ProgramAbout, SkeletonCard, Spinner, StatusBadge } from "../../components/ui.jsx";
+import {
+  attendance, canEditActivity, fmtDate, fmtDateLong, fmtRelative, phaseLabel, programByKey, PROG_COLORS, progressLabel,
+} from "../../lib/format.js";
 import { PHASES } from "../../config.js";
 import { useAuthStore } from "../../stores/auth.js";
 import { useApi } from "../../stores/data.js";
@@ -37,12 +39,7 @@ function ProgramPage({ loaderData }) {
       <ProgramAbout program={program} />
       {!d ? <><div className="grid g-2"><SkeletonCard /><SkeletonCard /></div></> : (
         <>
-          <div className="kpi-row">
-            <Kpi label="Kemajuan program" value={d.kpi.progress + "%"} hint={`${fmtNum(d.kpi.totalDone)} dari ${fmtNum(d.kpi.totalActivities)} kegiatan selesai`} icon="trend" />
-            <Kpi label="Berlangsung" value={fmtNum(d.kpi.totalOngoing)} tone="t-ongoing" icon="calendar" />
-            <Kpi label="Akan datang" value={fmtNum(d.kpi.totalUpcoming)} tone="t-upcoming" icon="calendar" />
-            <Kpi label="Selesai" value={fmtNum(d.kpi.totalDone)} tone="t-done" icon="checkCircle" />
-          </div>
+          <ProgressSummary progress={d.kpi.progress} activities={d.activities} />
           <div className="grid g-2">
             <MilestoneCard title="Sedang berlangsung" tone="red" items={d.milestones.ongoing} program={program}
               empty="Tidak ada kegiatan dalam rentang H-2 sampai H+7." />
@@ -59,6 +56,57 @@ function ProgramPage({ loaderData }) {
       )}
       <ActivitiesTable fixedProgram={program.api} title={"Kegiatan " + program.label} />
     </div>
+  );
+}
+
+// kegiatan terakhir yang sudah terlaksana (tanggal hari ini atau sebelumnya, paling baru)
+function lastPerformed(activities) {
+  const today = new Date(); today.setHours(23, 59, 59, 999);
+  return activities
+    .filter((a) => a.date && new Date(a.date) <= today)
+    .sort((a, b) => new Date(b.date) - new Date(a.date) || new Date(b.createdAt) - new Date(a.createdAt))[0] || null;
+}
+
+// kalimat ringkas dari data kegiatan: kapan, di mana, kehadiran, nilai, isu
+function describe(a) {
+  const att = attendance(a.participants);
+  const parts = [`Dilaksanakan ${fmtDateLong(a.date)}${a.location ? ` di ${a.location}` : ""}${a.phase ? ` (${phaseLabel(a.phase)})` : ""}.`];
+  if (att.reg) parts.push(`Dihadiri ${att.pres.toLocaleString("id-ID")} dari ${att.reg.toLocaleString("id-ID")} peserta terdaftar (${att.pct}%).`);
+  const scores = [a.achievementValue != null && `nilai capaian ${a.achievementValue}`, a.feedback != null && `umpan balik ${a.feedback}`].filter(Boolean);
+  if (scores.length) parts.push(scores.join(" dan ").replace(/^./, (c) => c.toUpperCase()) + ".");
+  if (a.progress) parts.push(`Keberjalanan: ${progressLabel(a.progress)}.`);
+  if (a.issues?.length) parts.push(`${a.issues.length} isu tercatat.`);
+  return parts.join(" ");
+}
+
+function ProgressSummary({ progress, activities }) {
+  const [open, setOpen] = useState(false);
+  const last = lastPerformed(activities);
+  return (
+    <section className="card progress-card">
+      <div className="pc-progress">
+        <span className="kpi-lab"><Icon name="trend" size={15} />Kemajuan program</span>
+        <b className="pc-val">{progress}%</b>
+        <Bar value={progress} tone={progress >= 80 ? "ok" : progress >= 50 ? "" : "warn"} />
+      </div>
+      <div className="pc-last">
+        <span className="kpi-lab"><Icon name="checkCircle" size={15} />Kegiatan terakhir</span>
+        {!last ? <p className="pc-desc muted">Belum ada kegiatan yang terlaksana.</p> : (
+          <>
+            <div className="pc-head">
+              <button type="button" className="row-link" onClick={() => setOpen(true)}>{last.name}</button>
+              <StatusBadge status={last.status} />
+            </div>
+            <p className="pc-desc">{describe(last)}</p>
+            <div className="row-meta">
+              <span title={fmtDate(last.date)}>{fmtRelative(last.date)}</span>
+              {last.pic && <span>PIC {last.pic}</span>}
+            </div>
+          </>
+        )}
+      </div>
+      <ActivityDetail activity={open ? last : null} onClose={() => setOpen(false)} canEdit={false} />
+    </section>
   );
 }
 

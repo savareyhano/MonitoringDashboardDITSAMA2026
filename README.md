@@ -71,5 +71,8 @@ di `vite.config.js`.
 `/dashboard/financial` tetap bisa dibuka langsung di GitHub Pages).
 
 ## Catatan keamanan
-- Password dan Password Akses diperiksa di backend; website hanya menyimpan token di memori.
-- Sesi login tidak disimpan: pengguna wajib login setiap membuka website.
+- Password dan Password Akses diperiksa di backend.
+- Sesi login (token) disimpan di localStorage browser, jadi tetap masuk saat halaman dimuat ulang
+  atau dibuka di tab baru, sampai token kedaluwarsa (`ACCESS_TOKEN_EXPIRE_IN_MINUTES` di backend,
+  default 7 hari) atau pengguna menekan **Keluar**. Masuk/keluar di satu tab ikut berlaku di tab lain.
+- Di komputer bersama, selalu tekan **Keluar** setelah selesai.

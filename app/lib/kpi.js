@@ -1,0 +1,148 @@
+// Keterangan indikator dashboard (dari "Keterangan KPI Dashboard DITSAMA 2026").
+// Ditampilkan lewat tombol (i) di samping tiap indikator.
+// title · arti · rumus · skor ([pilihan, nilai][]) · catatan
+
+const STATUS_KEGIATAN = [
+  ["Akan Datang", "lebih dari 2 hari sebelum tanggal kegiatan (< H-2)"],
+  ["Berlangsung", "H-2 sampai H+7 dari tanggal kegiatan"],
+  ["Selesai", "lewat H+7, atau ditandai lewat tombol Tandai selesai"],
+];
+
+export const KPI = {
+  // ---------------------------------------------------- performa kegiatan ---
+  achievementValue: {
+    title: "Nilai Capaian Peserta",
+    arti: "Rata-rata nilai capaian atau hasil belajar peserta pada kegiatan.",
+    rumus: "Rata-rata Nilai Capaian dari semua kegiatan yang mengisinya.",
+    catatan: "Kegiatan dengan nilai kosong atau 0 tidak dihitung. Jika belum ada yang mengisi, hasilnya 0%.",
+  },
+  attendancePercentage: {
+    title: "Performa Kehadiran Peserta",
+    arti: "Seberapa banyak peserta terdaftar yang benar-benar hadir.",
+    rumus: "Per kegiatan: total hadir ÷ total terdaftar (semua kategori peserta) × 100%. Lalu dirata-rata antar kegiatan.",
+    catatan: "Kegiatan tanpa data peserta tidak dihitung. Setiap kegiatan berbobot sama; kehadiran yang berbobot jumlah peserta ada di % Kehadiran (tertimbang) pada Analisis Peserta.",
+  },
+  activityProgress: {
+    title: "Performa Keberjalanan Aktivitas",
+    arti: "Apakah kegiatan berjalan sesuai rencana.",
+    rumus: "Keberjalanan tiap kegiatan diubah ke skor, lalu dirata-rata.",
+    skor: [["Sesuai Rencana", "100%"], ["Ada Kendala", "70%"], ["Tidak Sesuai Rencana", "40%"], ["Tidak Ada Penilaian / kosong", "tidak dihitung"]],
+  },
+  feedback: {
+    title: "Umpan Balik Peserta",
+    arti: "Kepuasan atau umpan balik peserta terhadap kegiatan.",
+    rumus: "Rata-rata Umpan Balik dari kegiatan yang mengisinya.",
+    catatan: "Nilai kosong atau 0 tidak dihitung.",
+  },
+  issueAlert: {
+    title: "Nilai Isu & Peringatan",
+    arti: "Tingkat “aman” kegiatan dari masalah. Makin tinggi makin aman.",
+    rumus: "Setiap kegiatan diberi skor dari level isu tertingginya, lalu dirata-rata.",
+    skor: [["Tidak ada isu", "100%"], ["Rendah (Low)", "80%"], ["Sedang (Medium)", "60%"], ["Tinggi (High)", "40%"]],
+    catatan: "Jika satu kegiatan punya beberapa isu, yang dipakai level tertinggi.",
+  },
+
+  // ------------------------------------------------------------ kemajuan ---
+  progress: {
+    title: "Kemajuan Keseluruhan",
+    arti: "Persentase kegiatan yang sudah selesai.",
+    rumus: "Jumlah kegiatan Selesai ÷ jumlah seluruh kegiatan × 100%.",
+    skor: STATUS_KEGIATAN,
+    catatan: "Agenda mendatang yang belum bertanggal dihitung Akan Datang; kegiatan lain tanpa tanggal dihitung Berlangsung.",
+  },
+  programProgress: {
+    title: "Kemajuan Program",
+    arti: "Persentase kegiatan program ini yang sudah selesai.",
+    rumus: "Jumlah kegiatan Selesai ÷ jumlah seluruh kegiatan program × 100%.",
+    skor: STATUS_KEGIATAN,
+  },
+  lastActivity: {
+    title: "Kegiatan Terakhir",
+    arti: "Kegiatan paling baru yang tanggalnya hari ini atau sebelumnya.",
+    rumus: "Diambil dari kegiatan bertanggal paling akhir yang sudah lewat atau sedang berjalan; uraiannya disusun dari data yang diisi (lokasi, fase, kehadiran, nilai, keberjalanan, isu).",
+    catatan: "Klik nama kegiatan untuk melihat rincian lengkapnya.",
+  },
+
+  // ------------------------------------------ kinerja portofolio program ---
+  completedTotal: {
+    title: "Selesai / Total",
+    arti: "Jumlah kegiatan selesai dibanding total kegiatan per program.",
+    rumus: "Hitung kegiatan Selesai ÷ hitung seluruh kegiatan program tersebut.",
+    catatan: "Ini progres (kuantitas), bukan Nilai Kinerja.",
+  },
+  performanceScore: {
+    title: "Nilai Kinerja",
+    arti: "Kualitas pelaksanaan program secara keseluruhan.",
+    rumus: "Langkah 1, per kegiatan: rata-rata komponen yang terisi (Nilai Capaian, Kehadiran, Umpan Balik, skor Keberjalanan, skor Isu). Langkah 2: rata-rata Nilai Kinerja semua kegiatan program (maks. 100%).",
+    catatan: "Skor Isu selalu ada (tanpa isu = 100%), jadi kegiatan yang belum diisi apa pun tetap bernilai 100% dan bisa menaikkan Nilai Kinerja.",
+  },
+  status: {
+    title: "Status Program",
+    arti: "Indikator warna dari Nilai Kinerja.",
+    rumus: "Ditentukan dari Nilai Kinerja program.",
+    skor: [["On Track", "≥ 80%"], ["Attention", "60% – 79%"], ["Critical", "< 60%"]],
+  },
+
+  // ---------------------------------------------------- analisis peserta ---
+  totalActivities: {
+    title: "Jumlah Aktivitas",
+    arti: "Jumlah kegiatan yang punya data peserta.",
+    rumus: "Hitung kegiatan yang mengisi minimal satu angka terdaftar atau hadir.",
+    catatan: "Ikut filter Program & Bulan saja.",
+  },
+  totalRegistered: {
+    title: "Total Pendaftaran",
+    arti: "Total peserta terdaftar.",
+    rumus: "Jumlah peserta terdaftar dari semua kategori di semua kegiatan.",
+    catatan: "Ikut filter Program & Bulan saja.",
+  },
+  totalPresent: {
+    title: "Total Kehadiran",
+    arti: "Total peserta yang hadir.",
+    rumus: "Jumlah peserta hadir dari semua kategori di semua kegiatan.",
+    catatan: "Ikut filter Program & Bulan saja.",
+  },
+  weightedAttendance: {
+    title: "% Kehadiran (tertimbang)",
+    arti: "Persentase kehadiran yang berbobot jumlah peserta.",
+    rumus: "Total Kehadiran ÷ Total Pendaftaran × 100%.",
+    catatan: "Berbeda dengan Performa Kehadiran Peserta (rata-rata per kegiatan): di sini kegiatan besar berbobot lebih besar.",
+  },
+
+  // ----------------------------------------------------------- lain-lain ---
+  issues: {
+    title: "Isu & Peringatan",
+    arti: "Masalah yang dicatat PIC pada kegiatan, diurutkan dari level tertinggi.",
+    rumus: "Diambil dari isu yang diisi di form kegiatan dan ikut semua filter.",
+    skor: [["Tinggi (High)", "masalah berat"], ["Sedang (Medium)", "masalah sedang"], ["Rendah (Low)", "masalah ringan"]],
+  },
+  milestones: {
+    title: "Agenda Mendatang",
+    arti: "Kegiatan berjenis Agenda mendatang yang tanggalnya hari ini atau sesudahnya.",
+    rumus: "Diurutkan dari tanggal terdekat.",
+    catatan: "Agenda dibuat di Data Kegiatan dengan jenis “Agenda mendatang”.",
+  },
+  ongoing: {
+    title: "Sedang Berlangsung",
+    arti: "Kegiatan program yang berstatus Berlangsung.",
+    rumus: "Tanggal kegiatan berada di rentang H-2 sampai H+7 dari hari ini, dan belum ditandai selesai.",
+    catatan: "Kegiatan tanpa tanggal (bukan agenda) juga dihitung Berlangsung.",
+  },
+  upcoming: {
+    title: "Agenda Mendatang",
+    arti: "Agenda program yang belum dimulai.",
+    rumus: "Kegiatan berjenis Agenda mendatang yang tanggalnya lebih dari 2 hari lagi (< H-2), atau belum bertanggal.",
+  },
+  timeline: {
+    title: "Linimasa Fase Kegiatan",
+    arti: "Rentang waktu tiap fase kegiatan.",
+    rumus: "Batang dimulai dari tanggal kegiatan paling awal dan berakhir di tanggal kegiatan paling akhir pada fase tersebut.",
+    catatan: "Hanya kegiatan yang punya tanggal dan fase yang ikut dihitung.",
+  },
+  calendar: {
+    title: "Kalender Kegiatan",
+    arti: "Sebaran kegiatan per tanggal, berwarna sesuai status.",
+    rumus: "Status dihitung dari tanggal kegiatan dibanding hari ini.",
+    skor: STATUS_KEGIATAN,
+  },
+};

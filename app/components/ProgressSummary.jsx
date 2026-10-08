@@ -5,6 +5,7 @@ import {
 } from "../lib/format.js";
 import { ActivityDetail } from "./Activities.jsx";
 import { Icon } from "./Icon.jsx";
+import { InfoTip } from "./InfoTip.jsx";
 import { Bar, StatusBadge } from "./ui.jsx";
 
 // kegiatan terakhir yang sudah terlaksana (tanggal hari ini atau sebelumnya, paling baru)
@@ -27,19 +28,22 @@ function describe(a) {
   return parts.join(" ");
 }
 
-/** last: kegiatan lengkap (rincian bisa dibuka) atau ringkasan kalender (tanpa peserta/nilai). */
-export function ProgressSummary({ label, progress, last, showProgram }) {
+/**
+ * last: kegiatan lengkap (rincian bisa dibuka) atau ringkasan kalender (tanpa peserta/nilai).
+ * info: kunci keterangan (lib/kpi.js); kpi: jumlah kegiatan per status, ditampilkan di keterangan.
+ */
+export function ProgressSummary({ label, info, progress, kpi, last, showProgram }) {
   const [open, setOpen] = useState(false);
   const full = !!last?.participants;
   return (
     <section className="card progress-card">
       <div className="pc-progress">
-        <span className="kpi-lab"><Icon name="trend" size={15} />{label}</span>
+        <span className="kpi-lab"><Icon name="trend" size={15} />{label}<InfoTip k={info} now={kpi && `Saat ini: ${kpi.totalDone} selesai dari ${kpi.totalActivities} kegiatan (${kpi.totalOngoing} berlangsung, ${kpi.totalUpcoming} akan datang).`} /></span>
         <b className="pc-val">{progress}%</b>
         <Bar value={progress} tone={progress >= 80 ? "ok" : progress >= 50 ? "" : "warn"} />
       </div>
       <div className="pc-last">
-        <span className="kpi-lab"><Icon name="checkCircle" size={15} />Kegiatan terakhir</span>
+        <span className="kpi-lab"><Icon name="checkCircle" size={15} />Kegiatan Terakhir<InfoTip k="lastActivity" /></span>
         {!last ? <p className="pc-desc muted">Belum ada kegiatan yang terlaksana.</p> : (
           <>
             <div className="pc-head">

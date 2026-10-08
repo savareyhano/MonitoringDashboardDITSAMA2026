@@ -4,6 +4,7 @@ import { Calendar } from "../../components/Calendar.jsx";
 import { ChartCanvas } from "../../components/ChartCanvas.jsx";
 import { Gantt } from "../../components/Gantt.jsx";
 import { Icon } from "../../components/Icon.jsx";
+import { InfoTip } from "../../components/InfoTip.jsx";
 import { lastPerformed, ProgressSummary } from "../../components/ProgressSummary.jsx";
 import {
   Bar, EmptyState, ErrorNote, LevelBadge, PageHead, ProgramAbout, SeeMore, Sheet, SkeletonCard,
@@ -17,7 +18,7 @@ import { useUiStore } from "../../stores/ui.js";
 // layout menampilkan panel Filter untuk route ini
 export const handle = { control: true };
 
-const STATUS = { "On Track": ["Sesuai target", "ok"], Attention: ["Perlu perhatian", "warn"], Critical: ["Kritis", "crit"] };
+const STATUS = { "On Track": "ok", Attention: "warn", Critical: "crit" };
 
 export default function Portfolio() {
   // halaman awal dashboard; Finance langsung diarahkan ke Keuangan
@@ -48,7 +49,7 @@ function PortfolioPage() {
       {program && <ProgramAbout program={program} />}
       {!d ? <PortfolioSkeleton /> : (
         <>
-          <ProgressSummary label="Kemajuan keseluruhan" progress={d.kpi.progress} last={last} showProgram />
+          <ProgressSummary label="Kemajuan Keseluruhan" info="progress" progress={d.kpi.progress} kpi={d.kpi} last={last} showProgram />
 
           <div className="grid g-5-7">
             <Performance strip={d.performanceStrip} />
@@ -69,7 +70,7 @@ function PortfolioPage() {
           </div>
 
           <section className="card">
-            <div className="card-head"><div><h2 className="card-title">Linimasa fase kegiatan</h2>
+            <div className="card-head"><div><h2 className="card-title with-info">Linimasa fase kegiatan<InfoTip k="timeline" /></h2>
               <div className="card-sub">Rentang tanggal tiap fase per program (ikut filter program &amp; bulan)</div></div></div>
             <Gantt
               rows={d.timeline.flatMap((t) => t.phases.map((ph) => ({
@@ -97,25 +98,25 @@ function PortfolioSkeleton() {
 }
 
 const PERF = [
-  ["achievementValue", "Nilai capaian peserta", "target"],
-  ["attendancePercentage", "Kehadiran peserta", "userCheck"],
-  ["activityProgress", "Keberjalanan kegiatan", "trend"],
-  ["feedback", "Umpan balik peserta", "message"],
-  ["issueAlert", "Skor isu & peringatan", "alert"],
+  ["achievementValue", "Nilai Capaian Peserta", "target"],
+  ["attendancePercentage", "Performa Kehadiran Peserta", "userCheck"],
+  ["activityProgress", "Performa Keberjalanan Aktivitas", "trend"],
+  ["feedback", "Umpan Balik Peserta", "message"],
+  ["issueAlert", "Nilai Isu & Peringatan", "alert"],
 ];
 function Performance({ strip }) {
   return (
     <section className="card">
-      <div className="card-head"><div><h2 className="card-title">Skor kinerja</h2><div className="card-sub">Rata-rata dari kegiatan yang punya nilai</div></div></div>
+      <div className="card-head"><div><h2 className="card-title">Performa kegiatan</h2><div className="card-sub">Rata-rata seluruh kegiatan sesuai filter · tekan (i) untuk cara hitungnya</div></div></div>
       <ul className="perf">
         {PERF.map(([k, label, icon]) => {
           const v = strip[k];
           return (
             <li key={k}>
               <span className="perf-ic"><Icon name={icon} size={16} /></span>
-              <span className="perf-lab">{label}</span>
+              <span className="perf-lab">{label}<InfoTip k={k} />{!v && <small>belum ada kegiatan yang mengisi</small>}</span>
               <Bar value={v} tone={!v ? "" : v < 60 ? "crit" : v < 80 ? "warn" : "ok"} />
-              <b className="perf-val">{v ? v + "%" : <span className="muted" title="Belum ada data">–</span>}</b>
+              <b className={"perf-val" + (v ? "" : " muted")}>{v}%</b>
             </li>
           );
         })}
@@ -127,19 +128,26 @@ function Performance({ strip }) {
 function PortfolioList({ items }) {
   return (
     <section className="card">
-      <div className="card-head"><div><h2 className="card-title">Kinerja portofolio program</h2>
-        <div className="card-sub">Nilai kinerja = rata-rata capaian, kehadiran, umpan balik, keberjalanan &amp; isu</div></div></div>
+      <div className="card-head"><div><h2 className="card-title">Kinerja Portofolio Program</h2>
+        <div className="card-sub">Progres dan kualitas pelaksanaan tiap program</div></div></div>
       {!items.length ? <EmptyState title="Belum ada data program" /> : (
         <ul className="port">
+          <li className="port-head">
+            <span />
+            <span>Program</span>
+            <span className="port-cnt">Selesai / Total<InfoTip k="completedTotal" /></span>
+            <span>Nilai Kinerja<InfoTip k="performanceScore" /></span>
+            <span className="port-st">Status<InfoTip k="status" /></span>
+          </li>
           {items.map((p) => {
-            const [label, tone] = STATUS[p.status] || [p.status, ""];
+            const tone = STATUS[p.status] || "";
             return (
               <li key={p.program}>
                 <span className="port-dot" style={{ background: progColor(p.program) }} />
                 <div className="port-nm"><b>{p.label}</b><small>{p.pics.length ? "PIC: " + p.pics.join(", ") : "Belum ada PIC"}</small></div>
-                <div className="port-cnt" title="Kegiatan selesai / total">{p.completedActivities}<span className="muted">/{p.totalActivities}</span></div>
+                <div className="port-cnt" title={`${p.completedActivities} selesai dari ${p.totalActivities} kegiatan`}>{p.completedActivities}<span className="muted">/{p.totalActivities}</span></div>
                 <div className="port-score"><Bar value={p.performanceScore} tone={tone} /><b>{p.performanceScore}%</b></div>
-                <span className={"pill " + tone}>{label}</span>
+                <span className={"pill " + tone}>{p.status}</span>
               </li>
             );
           })}
@@ -155,7 +163,7 @@ function Issues({ items }) {
   return (
     <section className="card">
       <div className="card-head">
-        <div><h2 className="card-title">Isu &amp; peringatan</h2><div className="card-sub">{items.length ? `${items.length} isu tercatat, terberat di atas` : "Tidak ada isu tercatat"}</div></div>
+        <div><h2 className="card-title with-info">Isu &amp; Peringatan<InfoTip k="issues" /></h2><div className="card-sub">{items.length ? `${items.length} isu tercatat, terberat di atas` : "Tidak ada isu tercatat"}</div></div>
         <div className="lv-counts">{["high", "medium", "low"].map((l) => counts[l] ? <span key={l} className={"level lv-" + l}>{counts[l]}</span> : null)}</div>
       </div>
       {!items.length ? <EmptyState icon="checkCircle" title="Semua kegiatan berjalan tanpa isu" /> : (
@@ -186,7 +194,7 @@ function Milestones({ items }) {
   const past = items.length - next.length;
   return (
     <section className="card">
-      <div className="card-head"><div><h2 className="card-title">Agenda mendatang</h2>
+      <div className="card-head"><div><h2 className="card-title with-info">Agenda Mendatang<InfoTip k="milestones" /></h2>
         <div className="card-sub">{next.length ? `${next.length} agenda terjadwal` : "Tidak ada agenda terjadwal"}{past > 0 && ` · ${past} agenda sudah lewat`}</div></div></div>
       {!next.length ? <EmptyState icon="calendar" title="Belum ada agenda ke depan">Agenda dibuat dari Data Kegiatan dengan jenis “Agenda mendatang”.</EmptyState> : (
         <SeeMore items={next} limit={4} render={(m) => {
@@ -227,12 +235,12 @@ function ParticipantAnalysis({ a }) {
 
   return (
     <section className="card">
-      <div className="card-head"><div><h2 className="card-title">Analisis peserta</h2><div className="card-sub">Pendaftaran &amp; kehadiran (ikut filter program &amp; bulan)</div></div></div>
+      <div className="card-head"><div><h2 className="card-title">Analisis Peserta</h2><div className="card-sub">Pendaftaran &amp; kehadiran (ikut filter program &amp; bulan)</div></div></div>
       <div className="stat-row">
-        <div><span>Kegiatan berpeserta</span><b>{fmtNum(a.totalActivities)}</b></div>
-        <div><span>Total terdaftar</span><b>{fmtNum(a.totalRegistered)}</b></div>
-        <div><span>Total hadir</span><b>{fmtNum(a.totalPresent)}</b></div>
-        <div><span>Kehadiran tertimbang</span><b>{a.attendancePercentage}%</b></div>
+        <div><span>Jumlah Aktivitas<InfoTip k="totalActivities" /></span><b>{fmtNum(a.totalActivities)}</b></div>
+        <div><span>Total Pendaftaran<InfoTip k="totalRegistered" /></span><b>{fmtNum(a.totalRegistered)}</b></div>
+        <div><span>Total Kehadiran<InfoTip k="totalPresent" /></span><b>{fmtNum(a.totalPresent)}</b></div>
+        <div><span>% Kehadiran (tertimbang)<InfoTip k="weightedAttendance" /></span><b>{a.attendancePercentage}%</b></div>
       </div>
       <div className="grid g-7-5 inner">
         <div>

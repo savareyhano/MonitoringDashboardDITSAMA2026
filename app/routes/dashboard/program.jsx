@@ -5,6 +5,7 @@ import { ActivitiesTable, useActivityActions } from "../../components/Activities
 import { ActivityForm } from "../../components/ActivityForm.jsx";
 import { Gantt } from "../../components/Gantt.jsx";
 import { Icon } from "../../components/Icon.jsx";
+import { InfoTip } from "../../components/InfoTip.jsx";
 import { lastPerformed, ProgressSummary } from "../../components/ProgressSummary.jsx";
 import { ErrorNote, PageHead, ProgramAbout, SkeletonCard, Spinner } from "../../components/ui.jsx";
 import { canEditActivity, fmtDate, phaseLabel, programByKey, PROG_COLORS } from "../../lib/format.js";
@@ -38,15 +39,15 @@ function ProgramPage({ loaderData }) {
       <ProgramAbout program={program} />
       {!d ? <><div className="grid g-2"><SkeletonCard /><SkeletonCard /></div></> : (
         <>
-          <ProgressSummary label="Kemajuan program" progress={d.kpi.progress} last={lastPerformed(d.activities)} />
+          <ProgressSummary label="Kemajuan Program" info="programProgress" progress={d.kpi.progress} kpi={d.kpi} last={lastPerformed(d.activities)} />
           <div className="grid g-2">
-            <MilestoneCard title="Sedang berlangsung" tone="red" items={d.milestones.ongoing} program={program}
+            <MilestoneCard title="Sedang Berlangsung" info="ongoing" tone="red" items={d.milestones.ongoing} program={program}
               empty="Tidak ada kegiatan dalam rentang H-2 sampai H+7." />
-            <MilestoneCard title="Agenda mendatang" tone="yellow" items={d.milestones.upcoming} program={program}
+            <MilestoneCard title="Agenda Mendatang" info="upcoming" tone="yellow" items={d.milestones.upcoming} program={program}
               empty="Belum ada agenda. Tambahkan lewat Data Kegiatan dengan jenis “Agenda mendatang”." />
           </div>
           <section className="card">
-            <div className="card-head"><div><h2 className="card-title">Linimasa fase kegiatan</h2><div className="card-sub">Rentang tanggal tiap fase program ini</div></div></div>
+            <div className="card-head"><div><h2 className="card-title with-info">Linimasa fase kegiatan<InfoTip k="timeline" /></h2><div className="card-sub">Rentang tanggal tiap fase program ini</div></div></div>
             <Gantt rows={d.timeline.map((t) => ({
               key: t.phase, label: phaseLabel(t.phase), color: phaseColor(t.phase), start: t.startDate, end: t.endDate, count: t.activityCount,
             }))} />
@@ -59,7 +60,7 @@ function ProgramPage({ loaderData }) {
 }
 
 // daftar kegiatan Berlangsung / Agenda + tombol Isi data / Selesai / Hapus
-function MilestoneCard({ title, tone, items, program, empty }) {
+function MilestoneCard({ title, info, tone, items, program, empty }) {
   const session = useAuthStore((s) => s.session);
   const can = canEditActivity(session, program.api);
   const actions = useActivityActions();
@@ -67,7 +68,7 @@ function MilestoneCard({ title, tone, items, program, empty }) {
   return (
     <section className="card">
       <div className="card-head">
-        <div className="card-title-row"><h2 className="card-title">{title}</h2><span className={"nav-badge " + tone}>{items.length}</span></div>
+        <div className="card-title-row"><h2 className="card-title with-info">{title}<InfoTip k={info} /></h2><span className={"nav-badge " + tone}>{items.length}</span></div>
       </div>
       {!items.length ? <div className="empty-inline">{empty}</div> : (
         <ul className="ms-list">

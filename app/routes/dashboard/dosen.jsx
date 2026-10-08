@@ -94,20 +94,21 @@ function DosenPage() {
             <div className="tbl-toolbar"><SearchInput value={ui.search} onChange={(v) => patch("dsn", { search: v })} placeholder="Cari nama dosen" delay={150} /></div>
             {!lecturers.length ? <EmptyState icon="search" title="Tidak ada dosen yang cocok" /> : (
               <div className="tbl-scroll"><table className="tbl dsn-tbl">
-                <thead><tr><th className="c-rank">#</th><th>Dosen</th><th className="c-meth">Metode</th><th className="num">Penilaian</th><th className="c-dist">Sebaran 1–5</th><th className="num">Rata-rata</th><th>Predikat</th></tr></thead>
+                <thead><tr><th className="c-rank">#</th><th>Dosen</th><th className="c-meth">Metode</th><th className="num sm-hide">Penilaian</th><th className="c-dist">Sebaran 1–5</th><th className="num">Rata-rata</th><th className="sm-hide">Predikat</th></tr></thead>
                 <tbody>{lecturers.map((l) => {
                   const mx = Math.max(...l.distribution, 1);
                   return (
                     <tr key={l.key} className={(ui.sel === l.key ? "sel " : "") + (l.rank <= 3 ? "top" : "")} onClick={() => select(l.key)}>
                       <td className="c-rank"><span className={"rank-no" + (l.rank <= 3 ? " top" : "")}>{l.rank}</span></td>
                       <td><button type="button" className="row-link" onClick={(e) => { e.stopPropagation(); select(l.key); }}>{l.name}</button>
-                        <div className="row-meta"><span>{l.subjects.join(", ")}</span><span>{l.programs.join(", ")}</span></div></td>
+                        <div className="row-meta"><span>{l.subjects.join(", ")}</span><span>{l.programs.join(", ")}</span><span className="sm-only">{fmtNum(l.totalRatings)} penilaian</span></div>
+                        <span className={"pred sm-only " + l.predicate.grade}>{l.predicate.text}</span></td>
                       <td className="c-meth">{l.methods.join(", ")}</td>
-                      <td className="num">{fmtNum(l.totalRatings)}</td>
+                      <td className="num sm-hide">{fmtNum(l.totalRatings)}</td>
                       <td className="c-dist" title={l.distribution.map((c, i) => `${i + 1}: ${c}`).join(" · ")}>
                         <span className="dist">{l.distribution.map((c, i) => <i key={i} style={{ height: Math.round((c / mx) * 20) + 2 }} />)}</span></td>
                       <td className="num cell-strong">{score(l.averageScore)}</td>
-                      <td><span className={"pred " + l.predicate.grade}>{l.predicate.text}</span></td>
+                      <td className="sm-hide"><span className={"pred " + l.predicate.grade}>{l.predicate.text}</span></td>
                     </tr>
                   );
                 })}</tbody>

@@ -138,6 +138,9 @@ function FinCharts({ d }) {
   );
 }
 
+// kartu sempit: nominal diringkas (Rp 1,07 M)
+const Money = ({ v }) => <><span className="sm-hide">{fmtRupiah(v)}</span><span className="sm-only">{fmtRupiahShort(v)}</span></>;
+
 function Summary({ rows }) {
   const used = rows.filter((r) => r.totalPks || r.totalSubmission);
   const idle = rows.length - used.length;
@@ -147,12 +150,12 @@ function Summary({ rows }) {
         <div className="card-sub">{idle > 0 ? `${idle} program belum punya transaksi dan tidak ditampilkan` : "Semua program"}</div></div></div>
       {!used.length ? <div className="empty-inline">Belum ada transaksi untuk filter ini.</div> : (
         <div className="tbl-scroll"><table className="tbl compact">
-          <thead><tr><th>Program</th><th className="num">Nilai PKS</th><th className="num">DPKS</th><th className="num">Pengajuan</th><th className="num">Saldo</th><th className="c-abs">Serapan</th></tr></thead>
+          <thead><tr><th>Program</th><th className="num">Nilai PKS</th><th className="num sm-hide">DPKS</th><th className="num sm-hide">Pengajuan</th><th className="num">Saldo</th><th className="c-abs">Serapan</th></tr></thead>
           <tbody>{used.map((r) => (
             <tr key={r.program}>
               <td className="cell-strong"><span className="port-dot" style={{ background: progColor(r.program) }} />{finProgramLabel(r.program)}</td>
-              <td className="num">{fmtRupiah(r.totalPks)}</td><td className="num">{fmtRupiah(r.totalDpks)}</td>
-              <td className="num">{fmtRupiah(r.totalSubmission)}</td><td className={"num cell-strong" + (r.balance < 0 ? " neg" : "")}>{fmtRupiah(r.balance)}</td>
+              <td className="num"><Money v={r.totalPks} /></td><td className="num sm-hide">{fmtRupiah(r.totalDpks)}</td>
+              <td className="num sm-hide">{fmtRupiah(r.totalSubmission)}</td><td className={"num cell-strong" + (r.balance < 0 ? " neg" : "")}><Money v={r.balance} /></td>
               <td className="c-abs"><span className="att-cell"><Bar value={r.absorptionPercentage} />{r.absorptionPercentage}%</span></td>
             </tr>
           ))}</tbody>

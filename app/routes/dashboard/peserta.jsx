@@ -145,12 +145,12 @@ function Ranking({ d, sort, onSort, showAll, onToggle }) {
       </div>
       {!list.length ? <div className="empty-inline">Pilih ujian lain atau urutan lain.</div> : (
         <div className="tbl-scroll"><table className="tbl compact">
-          <thead><tr><th className="c-rank">#</th><th>Peserta</th><th>Program</th><th>Fakultas</th><th>Indeks</th><th className="num">{metric}</th></tr></thead>
+          <thead><tr><th className="c-rank">#</th><th>Peserta</th><th className="sm-hide">Program</th><th className="sm-hide">Fakultas</th><th>Indeks</th><th className="num">{metric}</th></tr></thead>
           <tbody>{shown.map((p, i) => (
             <tr key={i} className={p.rank <= 3 ? "top" : ""}>
               <td className="c-rank"><span className={"rank-no" + (p.rank <= 3 ? " top" : "")}>{p.rank}</span></td>
-              <td><div className="cell-strong">{p.nama}</div><div className="row-meta"><span>{p.school}</span><span>{p.province}</span></div></td>
-              <td>{p.program}</td><td>{p.faculty || "–"}</td><td><IdxChip ix={p.index} /></td>
+              <td><div className="cell-strong">{p.nama}</div><div className="row-meta"><span className="sm-only">{p.program}</span><span>{p.school}</span><span>{p.province}</span></div></td>
+              <td className="sm-hide">{p.program}</td><td className="sm-hide">{p.faculty || "–"}</td><td><IdxChip ix={p.index} /></td>
               <td className="num cell-strong">{sort === "naik" && p.metricValue > 0 ? "+" : ""}{Number(p.metricValue).toLocaleString("id-ID", { maximumFractionDigits: 1 })}</td>
             </tr>
           ))}</tbody>
@@ -177,15 +177,15 @@ function Schools({ d }) {
       {!list.length ? <div className="empty-inline">Tidak ada sekolah yang cocok.</div> : (
         <div className="tbl-scroll"><table className="tbl compact">
           <thead><tr><th className="c-rank">#</th><th>Sekolah / instansi</th><th className="num">Peserta</th><th className="c-share">Porsi</th>
-            <th title="Berapa periode berbeda sekolah ini mengirim peserta">Frekuensi</th><th className="num">Rata-rata nilai</th></tr></thead>
+            <th className="sm-hide" title="Berapa periode berbeda sekolah ini mengirim peserta">Frekuensi</th><th className="num sm-hide">Rata-rata nilai</th></tr></thead>
           <tbody>{shown.map((s) => (
             <tr key={s.school}>
               <td className="c-rank muted">{s.rank}</td>
-              <td><div className="cell-strong">{s.school}</div><div className="row-meta"><span>{s.province || "–"}</span></div></td>
+              <td><div className="cell-strong">{s.school}</div><div className="row-meta"><span className="sm-only">{s.frequency}× ikut</span>{s.averageScore != null && <span className="sm-only">rata-rata {Number(s.averageScore).toLocaleString("id-ID", { maximumFractionDigits: 1 })}</span>}<span>{s.province || "–"}</span></div></td>
               <td className="num cell-strong">{fmtNum(s.participantCount)}</td>
               <td className="c-share"><span className="att-cell"><Bar value={s.percentage} />{Number(s.percentage).toLocaleString("id-ID", { maximumFractionDigits: 1 })}%</span></td>
-              <td title={s.periods.map((p) => `${p.key}: ${p.count} peserta`).join("\n")}>{s.frequency}× <span className="muted small">{s.periods.slice(0, 2).map((p) => p.key).join(", ")}{s.periods.length > 2 ? ", …" : ""}</span></td>
-              <td className="num">{s.averageScore == null ? <span className="muted">–</span> : Number(s.averageScore).toLocaleString("id-ID", { maximumFractionDigits: 1 })}{s.gradedCount > 0 && <span className="muted small"> · {s.gradedCount} dinilai</span>}</td>
+              <td className="sm-hide" title={s.periods.map((p) => `${p.key}: ${p.count} peserta`).join("\n")}>{s.frequency}× <span className="muted small">{s.periods.slice(0, 2).map((p) => p.key).join(", ")}{s.periods.length > 2 ? ", …" : ""}</span></td>
+              <td className="num sm-hide">{s.averageScore == null ? <span className="muted">–</span> : Number(s.averageScore).toLocaleString("id-ID", { maximumFractionDigits: 1 })}{s.gradedCount > 0 && <span className="muted small"> · {s.gradedCount} dinilai</span>}</td>
             </tr>
           ))}</tbody>
         </table></div>

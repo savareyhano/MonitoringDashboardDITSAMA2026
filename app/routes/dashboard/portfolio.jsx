@@ -306,11 +306,11 @@ function Capaian({ cap }) {
       )}
       {!rows.length ? <div className="empty-inline">{cap.items.length ? "Tidak ada capaian yang cocok." : "Belum ada data capaian."}</div> : (
         <div className="tbl-scroll"><table className="tbl compact">
-          <thead><tr><th>Program</th><th>Kategori</th><th>Peringkat</th><th>Nama</th><th>Jenis</th></tr></thead>
+          <thead><tr><th className="sm-hide">Program</th><th>Kategori</th><th>Peringkat</th><th>Nama</th><th className="sm-hide">Jenis</th></tr></thead>
           <tbody>{rows.map((x, i) => (
-            <tr key={i}><td>{x.programLabel}</td><td className="cell-strong">{x.category || "–"}</td>
+            <tr key={i}><td className="sm-hide">{x.programLabel}</td><td><div className="cell-strong">{x.category || "–"}</div><div className="row-meta sm-only"><span>{x.programLabel}</span><span>{x.type}</span></div></td>
               <td><span className={"medal " + x.rank.cls}>{x.rank.label}</span></td>
-              <td className="wrap">{x.names.join(", ")}</td><td>{x.type}{x.names.length > 1 && <span className="muted"> · {x.names.length} orang</span>}</td></tr>
+              <td className="wrap">{x.names.join(", ")}</td><td className="sm-hide">{x.type}{x.names.length > 1 && <span className="muted"> · {x.names.length} orang</span>}</td></tr>
           ))}</tbody>
         </table></div>
       )}

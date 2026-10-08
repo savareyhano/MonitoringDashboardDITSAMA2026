@@ -227,7 +227,7 @@ function ParticipantAnalysis({ a }) {
 
   return (
     <section className="card">
-      <div className="card-head"><div><h2 className="card-title">Analisis peserta</h2><div className="card-sub">Pendaftaran &amp; kehadiran dari Data Kegiatan (ikut filter program &amp; bulan)</div></div></div>
+      <div className="card-head"><div><h2 className="card-title">Analisis peserta</h2><div className="card-sub">Pendaftaran &amp; kehadiran (ikut filter program &amp; bulan)</div></div></div>
       <div className="stat-row">
         <div><span>Kegiatan berpeserta</span><b>{fmtNum(a.totalActivities)}</b></div>
         <div><span>Total terdaftar</span><b>{fmtNum(a.totalRegistered)}</b></div>
@@ -265,7 +265,7 @@ function Capaian({ cap }) {
     <section className="card">
       <div className="card-head">
         <div><h2 className="card-title">Capaian peserta</h2>
-          <div className="card-sub">{cap.totalAchievements} capaian · {cap.totalParticipants} peserta (dari sheet Capaian_Peserta, ikut filter program &amp; tahun)</div></div>
+          <div className="card-sub">{cap.totalAchievements} capaian · {cap.totalParticipants} peserta (ikut filter program &amp; tahun)</div></div>
         <div className="search compact">
           <Icon name="search" size={16} />
           <input type="search" placeholder="Cari nama / kategori" aria-label="Cari capaian" value={q} onChange={(e) => useUiStore.setState({ capSearch: e.target.value })} />
@@ -314,7 +314,7 @@ function Sdm({ sdm, total }) {
 function Mitra({ items }) {
   return (
     <section className="card">
-      <div className="card-head"><div><h2 className="card-title">Mitra</h2><div className="card-sub">{items.length} mitra dari data SDM peran Mitra</div></div></div>
+      <div className="card-head"><div><h2 className="card-title">Mitra</h2><div className="card-sub">{items.length} mitra terlibat</div></div></div>
       {!items.length ? <div className="empty-inline">Belum ada data mitra.</div> : (
         <ul className="mitra">
           {items.map((m) => (

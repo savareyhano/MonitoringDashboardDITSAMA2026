@@ -42,9 +42,9 @@ function PesertaPage() {
 
   return (
     <div className="page">
-      <PageHead title="Peserta" sub="Data peserta, nilai ujian, dan sebaran sekolah dari Google Sheets">
+      <PageHead title="Peserta" sub="Data peserta, nilai ujian, dan sebaran sekolah">
         <button type="button" className="btn" onClick={refresh} disabled={busy || dash.loading}>
-          {busy ? <Spinner /> : <Icon name="refresh" size={16} />}<span className="btn-txt">Muat ulang dari Sheets</span>
+          {busy ? <Spinner /> : <Icon name="refresh" size={16} />}<span className="btn-txt">Muat ulang</span>
         </button>
       </PageHead>
 
@@ -63,7 +63,7 @@ function PesertaPage() {
 
       {!d ? (
         <>
-          {dash.loading && <div className="note"><Spinner />Mengambil data peserta dari Google Sheets… pemuatan pertama bisa memakan waktu beberapa detik.</div>}
+          {dash.loading && <div className="note"><Spinner />Memuat data peserta… pemuatan pertama bisa memakan waktu beberapa detik.</div>}
           <div className="grid g-2"><SkeletonCard lines={0} /><SkeletonCard lines={0} /></div>
         </>
       ) : (

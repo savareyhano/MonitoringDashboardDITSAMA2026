@@ -4,8 +4,9 @@ import { Calendar } from "../../components/Calendar.jsx";
 import { ChartCanvas } from "../../components/ChartCanvas.jsx";
 import { Gantt } from "../../components/Gantt.jsx";
 import { Icon } from "../../components/Icon.jsx";
+import { lastPerformed, ProgressSummary } from "../../components/ProgressSummary.jsx";
 import {
-  Bar, EmptyState, ErrorNote, Kpi, LevelBadge, PageHead, ProgramAbout, SeeMore, Sheet, SkeletonCard,
+  Bar, EmptyState, ErrorNote, LevelBadge, PageHead, ProgramAbout, SeeMore, Sheet, SkeletonCard,
 } from "../../components/ui.jsx";
 import { PROGRAMS } from "../../config.js";
 import { canSeeActivities, fmtDate, fmtNum, phaseLabel, progColor, withoutAll } from "../../lib/format.js";
@@ -28,6 +29,12 @@ function PortfolioPage() {
   const dash = useUiStore((s) => s.dash);
   const { data, error, loading, reload } = useApi("/dashboard", withoutAll(dash));
   const d = data?.data;
+  // kegiatan terakhir dari kalender (sudah ikut filter); data lengkapnya (peserta, nilai, isu) diambil terpisah
+  const lastEvent = useMemo(() => lastPerformed(d?.calendar || []), [d]);
+  const { data: hit } = useApi("/activities", lastEvent ? { programs: [lastEvent.program], search: lastEvent.name, perPage: 10 } : {},
+    { enabled: !!lastEvent });
+  const full = lastEvent && hit?.data?.find((a) => a.id === lastEvent.id);
+  const last = full ? { ...full, status: lastEvent.status } : lastEvent;
   const program = PROGRAMS.find((p) => p.label === dash.program);
   const filters = Object.entries(dash).filter(([, v]) => v !== "Semua").map(([, v]) => v);
 
@@ -41,12 +48,7 @@ function PortfolioPage() {
       {program && <ProgramAbout program={program} />}
       {!d ? <PortfolioSkeleton /> : (
         <>
-          <div className="kpi-row">
-            <Kpi label="Kemajuan keseluruhan" value={d.kpi.progress + "%"} hint={`${fmtNum(d.kpi.totalDone)} dari ${fmtNum(d.kpi.totalActivities)} kegiatan selesai`} icon="trend" />
-            <Kpi label="Berlangsung" value={fmtNum(d.kpi.totalOngoing)} hint="H-2 sampai H+7 dari tanggal kegiatan" tone="t-ongoing" icon="calendar" />
-            <Kpi label="Akan datang" value={fmtNum(d.kpi.totalUpcoming)} hint="Terjadwal lebih dari 2 hari lagi" tone="t-upcoming" icon="calendar" />
-            <Kpi label="Selesai" value={fmtNum(d.kpi.totalDone)} hint="Lewat H+7 atau ditandai selesai" tone="t-done" icon="checkCircle" />
-          </div>
+          <ProgressSummary label="Kemajuan keseluruhan" progress={d.kpi.progress} last={last} showProgram />
 
           <div className="grid g-5-7">
             <Performance strip={d.performanceStrip} />
@@ -87,7 +89,7 @@ function PortfolioPage() {
 function PortfolioSkeleton() {
   return (
     <>
-      <div className="kpi-row">{Array.from({ length: 4 }, (_, i) => <div className="kpi" key={i}><span className="skel" style={{ height: 12, width: "60%" }} /><span className="skel" style={{ height: 26, width: "40%", marginTop: 10 }} /></div>)}</div>
+      <SkeletonCard lines={3} />
       <div className="grid g-5-7"><SkeletonCard lines={5} /><SkeletonCard lines={5} /></div>
       <div className="grid g-2"><SkeletonCard /><SkeletonCard /></div>
     </>

@@ -142,7 +142,7 @@ a{color:var(--blue-ink);text-underline-offset:3px}
 .pc-progress .meter{height:8px;margin-top:4px}
 .pc-last{display:flex;flex-direction:column;gap:6px;padding:18px 20px;min-width:0}
 .pc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-.pc-head .row-link{font-size:15.5px}
+.pc-head .row-link,.pc-head .pc-name{font-size:15.5px;line-height:1.35;color:var(--ink)}
 .pc-desc{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink-2);max-width:80ch}
 
 .meter{display:block;height:6px;background:#E6ECF4;border-radius:6px;overflow:hidden;min-width:40px}

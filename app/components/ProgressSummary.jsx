@@ -1,7 +1,7 @@
 // Kartu kemajuan: persentase + uraian kegiatan terakhir yang sudah terlaksana.
 import { useState } from "react";
 import {
-  activityStatus, attendance, fmtDate, fmtDateLong, fmtRelative, phaseLabel, programLabel, progressLabel,
+  activityStatus, attendance, fmtDate, fmtDateLong, fmtNum, fmtRelative, phaseLabel, programLabel, progressLabel,
 } from "../lib/format.js";
 import { ActivityDetail } from "./Activities.jsx";
 import { Icon } from "./Icon.jsx";
@@ -32,8 +32,9 @@ function describe(a) {
  * last: kegiatan lengkap (rincian bisa dibuka) atau ringkasan kalender (tanpa peserta/nilai).
  * info: kunci keterangan (lib/kpi.js); kpi: jumlah kegiatan per status, ditampilkan di keterangan.
  * value/unit/note opsional: angka besar (mis. "3/10") + satuannya + keterangan di bawah bar; default `${progress}%`.
+ * status opsional: [label, nada] status program, tampil di samping angka.
  */
-export function ProgressSummary({ label, info, progress, value, unit, note, kpi, last, showProgram }) {
+export function ProgressSummary({ label, info, progress, value, unit, note, status, kpi, last, showProgram }) {
   const [open, setOpen] = useState(false);
   const full = !!last?.participants;
   const name = showProgram ? `${programLabel(last?.program)} — ${last?.name}` : last?.name;
@@ -41,7 +42,8 @@ export function ProgressSummary({ label, info, progress, value, unit, note, kpi,
     <section className="card progress-card">
       <div className="pc-progress">
         <span className="kpi-lab"><Icon name="trend" size={15} />{label}<InfoTip k={info} now={kpi && `Saat ini: ${kpi.totalDone} selesai dari ${kpi.totalActivities} aktivitas (${kpi.totalOngoing} berlangsung, ${kpi.totalUpcoming} akan datang).`} /></span>
-        <div className="pc-valrow"><b className="pc-val">{value ?? progress + "%"}</b>{unit && <span className="pc-unit">{unit}</span>}</div>
+        <div className="pc-valrow"><b className="pc-val">{value ?? progress + "%"}</b>{unit && <span className="pc-unit">{unit}</span>}
+          {status && <span className={"pill pc-status " + status[1]}>{status[0]}</span>}</div>
         <Bar value={progress} tone={progress >= 80 ? "ok" : progress >= 50 ? "" : "warn"} />
         {note && <span className="pc-note">{note}</span>}
       </div>
@@ -66,4 +68,25 @@ export function ProgressSummary({ label, info, progress, value, unit, note, kpi,
       {full && <ActivityDetail activity={open ? last : null} onClose={() => setOpen(false)} canEdit={false} />}
     </section>
   );
+}
+
+// program dihitung Selesai bila punya aktivitas dan semuanya Selesai
+export const isProgramDone = (p) => p.totalActivities > 0 && p.completedActivities === p.totalActivities;
+
+// status program dari aktivitasnya: [label, nada pill]
+export function programStatus(p) {
+  if (isProgramDone(p)) return ["Selesai", "ok"];
+  if (p.completedActivities > 0 || p.ongoingActivities > 0) return ["Sedang berlangsung", ""];
+  return ["Belum dilaksanakan", "idle"];
+}
+
+/** Kemajuan satu program (dashboard utama terfilter & dashboard program): aktivitas selesai / total + status program. */
+export function ProgramProgress({ program, kpi, last, showProgram }) {
+  const note = kpi.totalActivities
+    ? `${fmtNum(kpi.totalDone)} dari ${fmtNum(kpi.totalActivities)} total aktivitas program selesai (${kpi.progress}%)`
+    : "Belum ada aktivitas tercatat";
+  const status = programStatus({ completedActivities: kpi.totalDone, ongoingActivities: kpi.totalOngoing, totalActivities: kpi.totalActivities });
+  return <ProgressSummary label={"Kemajuan " + program.label} info="programProgress" kpi={kpi} progress={kpi.progress}
+    value={`${kpi.totalDone}/${kpi.totalActivities}`} unit={`aktivitas (${kpi.progress}%)`} note={note} status={status}
+    last={last} showProgram={showProgram} />;
 }

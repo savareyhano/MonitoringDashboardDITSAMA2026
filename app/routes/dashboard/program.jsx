@@ -6,7 +6,7 @@ import { ActivityForm } from "../../components/ActivityForm.jsx";
 import { Gantt } from "../../components/Gantt.jsx";
 import { Icon } from "../../components/Icon.jsx";
 import { InfoTip } from "../../components/InfoTip.jsx";
-import { lastPerformed, ProgressSummary } from "../../components/ProgressSummary.jsx";
+import { lastPerformed, ProgramProgress } from "../../components/ProgressSummary.jsx";
 import { ErrorNote, PageHead, ProgramAbout, SkeletonCard, Spinner } from "../../components/ui.jsx";
 import { canEditActivity, fmtDate, phaseLabel, programByKey, PROG_COLORS } from "../../lib/format.js";
 import { PHASES } from "../../config.js";
@@ -39,8 +39,7 @@ function ProgramPage({ loaderData }) {
       <ProgramAbout program={program} />
       {!d ? <><div className="grid g-2"><SkeletonCard /><SkeletonCard /></div></> : (
         <>
-          <ProgressSummary label="Kemajuan Program" info="programProgress" progress={d.kpi.progress} kpi={d.kpi} last={lastPerformed(d.activities)}
-            note={`${d.kpi.totalDone} dari ${d.kpi.totalActivities} total aktivitas program selesai`} />
+          <ProgramProgress program={program} kpi={d.kpi} last={lastPerformed(d.activities)} />
           <div className="grid g-2">
             <MilestoneCard title="Sedang Berlangsung" info="ongoing" tone="red" items={d.milestones.ongoing} program={program}
               empty="Tidak ada kegiatan dalam rentang H-2 sampai H+7." />

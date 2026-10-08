@@ -52,9 +52,10 @@ export const KPI = {
   },
   programProgress: {
     title: "Kemajuan Program",
-    arti: "Persentase kegiatan program ini yang sudah selesai.",
-    rumus: "Jumlah kegiatan Selesai ÷ jumlah seluruh kegiatan program × 100%.",
+    arti: "Jumlah aktivitas program yang sudah selesai dibanding seluruh aktivitasnya.",
+    rumus: "Aktivitas Selesai / seluruh aktivitas program; persentasenya = Selesai ÷ seluruh aktivitas × 100%.",
     skor: STATUS_KEGIATAN,
+    catatan: "Status program: Selesai bila semua aktivitas Selesai; Sedang berlangsung bila ada aktivitas Selesai atau Berlangsung; selain itu Belum dilaksanakan. Angka ini sama di Portofolio Program dan di dashboard program.",
   },
   lastActivity: {
     title: "Aktivitas Terakhir",
@@ -123,12 +124,6 @@ export const KPI = {
     rumus: "Diambil dari isu yang diisi di form kegiatan dan ikut semua filter.",
     skor: [["Tinggi (High)", "masalah berat"], ["Sedang (Medium)", "masalah sedang"], ["Rendah (Low)", "masalah ringan"]],
   },
-  milestones: {
-    title: "Agenda Mendatang",
-    arti: "Kegiatan berjenis Agenda mendatang yang tanggalnya hari ini atau sesudahnya.",
-    rumus: "Diurutkan dari tanggal terdekat.",
-    catatan: "Agenda dibuat di Data Kegiatan dengan jenis “Agenda mendatang”.",
-  },
   ongoing: {
     title: "Sedang Berlangsung",
     arti: "Kegiatan program yang berstatus Berlangsung.",
@@ -137,8 +132,9 @@ export const KPI = {
   },
   upcoming: {
     title: "Agenda Mendatang",
-    arti: "Agenda program yang belum dimulai.",
-    rumus: "Kegiatan berjenis Agenda mendatang yang tanggalnya lebih dari 2 hari lagi (< H-2), atau belum bertanggal.",
+    arti: "Agenda yang belum dimulai, diurutkan dari tanggal terdekat.",
+    rumus: "Aktivitas berjenis Agenda mendatang yang tanggalnya lebih dari 2 hari lagi (< H-2). Begitu masuk H-2, agenda pindah ke Sedang Berlangsung.",
+    catatan: "Aturan ini sama di Portofolio Program dan dashboard program. Agenda yang belum bertanggal hanya tampil di dashboard program. Agenda dibuat di Data Kegiatan dengan jenis “Agenda mendatang”.",
   },
   timeline: {
     title: "Linimasa Fase Kegiatan",

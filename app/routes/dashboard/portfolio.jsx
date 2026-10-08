@@ -1,11 +1,13 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Navigate } from "react-router";
 import { Calendar } from "../../components/Calendar.jsx";
 import { ChartCanvas } from "../../components/ChartCanvas.jsx";
 import { Gantt } from "../../components/Gantt.jsx";
 import { Icon } from "../../components/Icon.jsx";
 import { InfoTip } from "../../components/InfoTip.jsx";
-import { lastPerformed, ProgressSummary } from "../../components/ProgressSummary.jsx";
+import {
+  isProgramDone, lastPerformed, ProgramProgress, programStatus, ProgressSummary,
+} from "../../components/ProgressSummary.jsx";
 import {
   Bar, EmptyState, ErrorNote, LevelBadge, PageHead, ProgramAbout, SeeMore, Sheet, SkeletonCard,
 } from "../../components/ui.jsx";
@@ -26,7 +28,7 @@ export default function Portfolio() {
 
 function PortfolioPage() {
   const dash = useUiStore((s) => s.dash);
-  const { data, error, loading, reload } = useApi("/dashboard", withoutAll(dash));
+  const { data, error, loading, reload, fresh } = useApi("/dashboard", withoutAll(dash));
   const d = data?.data;
   // kegiatan terakhir dari kalender (sudah ikut filter); data lengkapnya (peserta, nilai, isu) diambil terpisah
   const lastEvent = useMemo(() => lastPerformed(d?.calendar || []), [d]);
@@ -35,6 +37,10 @@ function PortfolioPage() {
   const full = lastEvent && hit?.data?.find((a) => a.id === lastEvent.id);
   const last = full ? { ...full, status: lastEvent.status } : lastEvent;
   const program = PROGRAMS.find((p) => p.label === dash.program);
+  // program milik data yang sedang tampil: saat filter berganti, angka lama tidak diberi label program baru
+  const dataProgram = useRef(program);
+  if (fresh) dataProgram.current = program;
+  const shown = dataProgram.current;
   const filters = Object.entries(dash).filter(([, v]) => v !== "Semua").map(([, v]) => v);
 
   return (
@@ -47,16 +53,16 @@ function PortfolioPage() {
       {program && <ProgramAbout program={program} />}
       {!d ? <PortfolioSkeleton /> : (
         <>
-          <Progress kpi={d.kpi} portfolio={d.portfolio} program={program} last={last} />
+          <Progress kpi={d.kpi} portfolio={d.portfolio} program={shown} last={last} />
 
           <div className="grid g-5-7">
-            <Performance strip={d.performanceStrip} title={"Performa kegiatan " + (program ? program.label : "semua program")} />
-            <PortfolioList items={d.portfolio} program={program} />
+            <Performance strip={d.performanceStrip} title={"Performa kegiatan " + (shown ? shown.label : "semua program")} />
+            <PortfolioList items={d.portfolio} program={shown} />
           </div>
 
           <div className="grid g-2">
             <Issues items={d.issues} />
-            <Milestones items={d.milestones} />
+            <Milestones items={d.milestones} calendar={d.calendar} />
           </div>
 
           <ParticipantAnalysis a={d.participantAnalysis} />
@@ -97,20 +103,15 @@ function PortfolioSkeleton() {
 
 // semua program: jumlah program selesai / total program; satu program: aktivitas selesai / total aktivitasnya
 function Progress({ kpi, portfolio, program, last }) {
+  if (program) return <ProgramProgress program={program} kpi={kpi} last={last} showProgram />;
   const note = kpi.totalActivities
     ? `${fmtNum(kpi.totalDone)} dari ${fmtNum(kpi.totalActivities)} total aktivitas program selesai (${kpi.progress}%)`
     : "Belum ada aktivitas tercatat";
-  if (program) {
-    return <ProgressSummary label={"Kemajuan " + program.label} info="programProgress" kpi={kpi} progress={kpi.progress}
-      value={`${kpi.totalDone}/${kpi.totalActivities}`} unit={`aktivitas (${kpi.progress}%)`} note={note} last={last} showProgram />;
-  }
   const done = portfolio.filter(isProgramDone).length;
   const p = pct(done, TOTAL_PROGRAMS);
   return <ProgressSummary label="Program Selesai" info="progress" kpi={kpi} progress={p}
     value={`${done}/${TOTAL_PROGRAMS}`} unit={`program (${p}%)`} note={note} last={last} showProgram />;
 }
-
-const isProgramDone = (p) => p.totalActivities > 0 && p.completedActivities === p.totalActivities;
 
 const PERF = [
   ["achievementValue", "Nilai Capaian Peserta", "target"],
@@ -138,13 +139,6 @@ function Performance({ strip, title }) {
       </ul>
     </section>
   );
-}
-
-// status program dari aktivitasnya
-function programStatus(p) {
-  if (isProgramDone(p)) return ["Selesai", "ok"];
-  if (p.completedActivities > 0 || p.ongoingActivities > 0) return ["Sedang berlangsung", ""];
-  return ["Belum dilaksanakan", "idle"];
 }
 
 function PortfolioList({ items, program }) {
@@ -215,14 +209,15 @@ function Issues({ items }) {
   );
 }
 
-function Milestones({ items }) {
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const next = items.filter((m) => m.date && new Date(m.date) >= today);
+// aturan sama dengan dashboard program: agenda berstatus Akan Datang (> H+2); yang masuk H-2 tampil sebagai Berlangsung
+function Milestones({ items, calendar }) {
+  const statusById = Object.fromEntries(calendar.map((e) => [e.id, e.status]));
+  const next = items.filter((m) => statusById[m.id] === "upcoming");
   const past = items.length - next.length;
   return (
     <section className="card">
-      <div className="card-head"><div><h2 className="card-title with-info">Agenda Mendatang<InfoTip k="milestones" /></h2>
-        <div className="card-sub">{next.length ? `${next.length} agenda terjadwal` : "Tidak ada agenda terjadwal"}{past > 0 && ` · ${past} agenda sudah lewat`}</div></div></div>
+      <div className="card-head"><div><h2 className="card-title with-info">Agenda Mendatang<InfoTip k="upcoming" /></h2>
+        <div className="card-sub">{next.length ? `${next.length} agenda terjadwal` : "Tidak ada agenda terjadwal"}{past > 0 && ` · ${past} agenda sudah berlangsung atau selesai`}</div></div></div>
       {!next.length ? <EmptyState icon="calendar" title="Belum ada agenda ke depan">Agenda dibuat dari Data Kegiatan dengan jenis “Agenda mendatang”.</EmptyState> : (
         <SeeMore items={next} limit={4} render={(m) => {
           const dt = new Date(m.date);

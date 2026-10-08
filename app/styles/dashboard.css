@@ -162,6 +162,7 @@ a{color:var(--blue-ink);text-underline-offset:3px}
 .pc-progress .meter{height:8px;margin-top:4px}
 .pc-valrow{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .pc-unit{font-size:13px;font-weight:600;color:var(--muted)}
+.pc-status{align-self:center}
 .pc-note{font-size:12.5px;line-height:1.5;color:var(--muted)}
 .pc-last{display:flex;flex-direction:column;gap:6px;padding:18px 20px;min-width:0}
 .pc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}

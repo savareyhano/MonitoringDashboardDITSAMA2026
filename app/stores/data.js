@@ -40,7 +40,7 @@ const keyOf = (path, query) => path + "?" + JSON.stringify(Object.entries(query 
 
 /**
  * Ambil data endpoint GET. Data lama tetap tampil saat filter/halaman berganti (tidak berkedip).
- * `reload(extra)` memuat ulang paksa, mis. reload({ refresh: true }) untuk menyegarkan cache Google Sheets.
+ * `reload(extra)` memuat ulang paksa, mis. reload({ refresh: true }) untuk menyegarkan cache data peserta/dosen/capaian di server.
  */
 export function useApi(path, query, { enabled = true } = {}) {
   const key = keyOf(path, query);

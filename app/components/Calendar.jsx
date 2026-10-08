@@ -2,6 +2,7 @@ import { useState } from "react";
 import { fmtDateLong, MONTHS, statusLabel } from "../lib/format.js";
 import { useUiStore } from "../stores/ui.js";
 import { Icon } from "./Icon.jsx";
+import { InfoTip } from "./InfoTip.jsx";
 import { Sheet, StatusBadge } from "./ui.jsx";
 
 const HARI = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
@@ -35,7 +36,7 @@ export function Calendar({ events }) {
   return (
     <section className="card">
       <div className="card-head">
-        <div><h2 className="card-title">Kalender kegiatan</h2><div className="card-sub">{count} kegiatan di bulan ini · klik tanggal untuk rinciannya</div></div>
+        <div><h2 className="card-title with-info">Kalender kegiatan<InfoTip k="calendar" /></h2><div className="card-sub">{count} kegiatan di bulan ini · klik tanggal untuk rinciannya</div></div>
         <div className="cal-nav">
           <button className="icon-btn" type="button" onClick={() => shift(-1)} aria-label="Bulan sebelumnya"><Icon name="left" size={18} /></button>
           <span className="cal-month">{MONTHS[m]} {y}</span>

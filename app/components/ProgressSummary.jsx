@@ -31,30 +31,32 @@ function describe(a) {
 /**
  * last: kegiatan lengkap (rincian bisa dibuka) atau ringkasan kalender (tanpa peserta/nilai).
  * info: kunci keterangan (lib/kpi.js); kpi: jumlah kegiatan per status, ditampilkan di keterangan.
+ * value/unit/note opsional: angka besar (mis. "3/10") + satuannya + keterangan di bawah bar; default `${progress}%`.
  */
-export function ProgressSummary({ label, info, progress, kpi, last, showProgram }) {
+export function ProgressSummary({ label, info, progress, value, unit, note, kpi, last, showProgram }) {
   const [open, setOpen] = useState(false);
   const full = !!last?.participants;
+  const name = showProgram ? `${programLabel(last?.program)} — ${last?.name}` : last?.name;
   return (
     <section className="card progress-card">
       <div className="pc-progress">
-        <span className="kpi-lab"><Icon name="trend" size={15} />{label}<InfoTip k={info} now={kpi && `Saat ini: ${kpi.totalDone} selesai dari ${kpi.totalActivities} kegiatan (${kpi.totalOngoing} berlangsung, ${kpi.totalUpcoming} akan datang).`} /></span>
-        <b className="pc-val">{progress}%</b>
+        <span className="kpi-lab"><Icon name="trend" size={15} />{label}<InfoTip k={info} now={kpi && `Saat ini: ${kpi.totalDone} selesai dari ${kpi.totalActivities} aktivitas (${kpi.totalOngoing} berlangsung, ${kpi.totalUpcoming} akan datang).`} /></span>
+        <div className="pc-valrow"><b className="pc-val">{value ?? progress + "%"}</b>{unit && <span className="pc-unit">{unit}</span>}</div>
         <Bar value={progress} tone={progress >= 80 ? "ok" : progress >= 50 ? "" : "warn"} />
+        {note && <span className="pc-note">{note}</span>}
       </div>
       <div className="pc-last">
-        <span className="kpi-lab"><Icon name="checkCircle" size={15} />Kegiatan Terakhir<InfoTip k="lastActivity" /></span>
-        {!last ? <p className="pc-desc muted">Belum ada kegiatan yang terlaksana.</p> : (
+        <span className="kpi-lab"><Icon name="checkCircle" size={15} />Aktivitas Terakhir<InfoTip k="lastActivity" /></span>
+        {!last ? <p className="pc-desc muted">Belum ada aktivitas yang terlaksana.</p> : (
           <>
             <div className="pc-head">
               {full
-                ? <button type="button" className="row-link" onClick={() => setOpen(true)}>{last.name}</button>
-                : <b className="pc-name">{last.name}</b>}
+                ? <button type="button" className="row-link" onClick={() => setOpen(true)}>{name}</button>
+                : <b className="pc-name">{name}</b>}
               <StatusBadge status={activityStatus(last)} />
             </div>
             <p className="pc-desc">{describe(last)}</p>
             <div className="row-meta">
-              {showProgram && <span className="ptag">{programLabel(last.program)}</span>}
               <span title={fmtDate(last.date)}>{fmtRelative(last.date)}</span>
               {last.pic && <span>PIC {last.pic}</span>}
             </div>

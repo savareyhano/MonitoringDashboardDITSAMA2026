@@ -9,16 +9,14 @@ import { lastPerformed, ProgressSummary } from "../../components/ProgressSummary
 import {
   Bar, EmptyState, ErrorNote, LevelBadge, PageHead, ProgramAbout, SeeMore, Sheet, SkeletonCard,
 } from "../../components/ui.jsx";
-import { PROGRAMS } from "../../config.js";
-import { canSeeActivities, fmtDate, fmtNum, phaseLabel, progColor, withoutAll } from "../../lib/format.js";
+import { PROGRAMS, TOTAL_PROGRAMS } from "../../config.js";
+import { canSeeActivities, fmtDate, fmtNum, pct, phaseLabel, progColor, withoutAll } from "../../lib/format.js";
 import { useAuthStore } from "../../stores/auth.js";
 import { useApi } from "../../stores/data.js";
 import { useUiStore } from "../../stores/ui.js";
 
 // layout menampilkan panel Filter untuk route ini
 export const handle = { control: true };
-
-const STATUS = { "On Track": "ok", Attention: "warn", Critical: "crit" };
 
 export default function Portfolio() {
   // halaman awal dashboard; Finance langsung diarahkan ke Keuangan
@@ -49,11 +47,11 @@ function PortfolioPage() {
       {program && <ProgramAbout program={program} />}
       {!d ? <PortfolioSkeleton /> : (
         <>
-          <ProgressSummary label="Kemajuan Keseluruhan" info="progress" progress={d.kpi.progress} kpi={d.kpi} last={last} showProgram />
+          <Progress kpi={d.kpi} portfolio={d.portfolio} program={program} last={last} />
 
           <div className="grid g-5-7">
-            <Performance strip={d.performanceStrip} />
-            <PortfolioList items={d.portfolio} />
+            <Performance strip={d.performanceStrip} title={"Performa kegiatan " + (program ? program.label : "semua program")} />
+            <PortfolioList items={d.portfolio} program={program} />
           </div>
 
           <div className="grid g-2">
@@ -97,6 +95,23 @@ function PortfolioSkeleton() {
   );
 }
 
+// semua program: jumlah program selesai / total program; satu program: aktivitas selesai / total aktivitasnya
+function Progress({ kpi, portfolio, program, last }) {
+  const note = kpi.totalActivities
+    ? `${fmtNum(kpi.totalDone)} dari ${fmtNum(kpi.totalActivities)} total aktivitas program selesai (${kpi.progress}%)`
+    : "Belum ada aktivitas tercatat";
+  if (program) {
+    return <ProgressSummary label={"Kemajuan " + program.label} info="programProgress" kpi={kpi} progress={kpi.progress}
+      value={`${kpi.totalDone}/${kpi.totalActivities}`} unit={`aktivitas (${kpi.progress}%)`} note={note} last={last} showProgram />;
+  }
+  const done = portfolio.filter(isProgramDone).length;
+  const p = pct(done, TOTAL_PROGRAMS);
+  return <ProgressSummary label="Program Selesai" info="progress" kpi={kpi} progress={p}
+    value={`${done}/${TOTAL_PROGRAMS}`} unit={`program (${p}%)`} note={note} last={last} showProgram />;
+}
+
+const isProgramDone = (p) => p.totalActivities > 0 && p.completedActivities === p.totalActivities;
+
 const PERF = [
   ["achievementValue", "Nilai Capaian Peserta", "target"],
   ["attendancePercentage", "Performa Kehadiran Peserta", "userCheck"],
@@ -104,10 +119,10 @@ const PERF = [
   ["feedback", "Umpan Balik Peserta", "message"],
   ["issueAlert", "Nilai Isu & Peringatan", "alert"],
 ];
-function Performance({ strip }) {
+function Performance({ strip, title }) {
   return (
     <section className="card">
-      <div className="card-head"><div><h2 className="card-title">Performa kegiatan</h2><div className="card-sub">Rata-rata seluruh kegiatan sesuai filter · tekan (i) untuk cara hitungnya</div></div></div>
+      <div className="card-head"><div><h2 className="card-title">{title}</h2><div className="card-sub">Rata-rata seluruh kegiatan sesuai filter · tekan (i) untuk cara hitungnya</div></div></div>
       <ul className="perf">
         {PERF.map(([k, label, icon]) => {
           const v = strip[k];
@@ -125,34 +140,46 @@ function Performance({ strip }) {
   );
 }
 
-function PortfolioList({ items }) {
+// status program dari aktivitasnya
+function programStatus(p) {
+  if (isProgramDone(p)) return ["Selesai", "ok"];
+  if (p.completedActivities > 0 || p.ongoingActivities > 0) return ["Sedang berlangsung", ""];
+  return ["Belum dilaksanakan", "idle"];
+}
+
+function PortfolioList({ items, program }) {
+  // tampilkan semua program monitoring (yang belum punya aktivitas tetap muncul), atau hanya program terpilih
+  const rows = (program ? [program] : PROGRAMS).map((pr) => ({
+    pics: [], completedActivities: 0, ongoingActivities: 0, totalActivities: 0,
+    ...items.find((x) => x.program === pr.api), program: pr.api, label: pr.label,
+  }));
   return (
     <section className="card">
       <div className="card-head"><div><h2 className="card-title">Kinerja Portofolio Program</h2>
-        <div className="card-sub">Progres dan kualitas pelaksanaan tiap program</div></div></div>
-      {!items.length ? <EmptyState title="Belum ada data program" /> : (
-        <ul className="port">
-          <li className="port-head">
-            <span />
-            <span>Program</span>
-            <span className="port-cnt">Selesai / Total<InfoTip k="completedTotal" /></span>
-            <span>Nilai Kinerja<InfoTip k="performanceScore" /></span>
-            <span className="port-st">Status<InfoTip k="status" /></span>
-          </li>
-          {items.map((p) => {
-            const tone = STATUS[p.status] || "";
-            return (
-              <li key={p.program}>
-                <span className="port-dot" style={{ background: progColor(p.program) }} />
-                <div className="port-nm"><b>{p.label}</b><small>{p.pics.length ? "PIC: " + p.pics.join(", ") : "Belum ada PIC"}</small></div>
-                <div className="port-cnt" title={`${p.completedActivities} selesai dari ${p.totalActivities} kegiatan`}>{p.completedActivities}<span className="muted">/{p.totalActivities}</span></div>
-                <div className="port-score"><Bar value={p.performanceScore} tone={tone} /><b>{p.performanceScore}%</b></div>
-                <span className={"pill " + tone}>{p.status}</span>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+        <div className="card-sub">Progres = aktivitas selesai / total aktivitas program</div></div></div>
+      <ul className="port">
+        <li className="port-head">
+          <span />
+          <span>Program</span>
+          <span className="port-cnt">Selesai / Total<InfoTip k="completedTotal" /></span>
+          <span>Progres<InfoTip k="programPercent" /></span>
+          <span className="port-st">Status<InfoTip k="status" /></span>
+        </li>
+        {rows.map((p) => {
+          const [label, tone] = programStatus(p);
+          const prog = pct(p.completedActivities, p.totalActivities);
+          return (
+            <li key={p.program}>
+              <span className="port-dot" style={{ background: progColor(p.program) }} />
+              <div className="port-nm"><b>{p.label}</b><small>{p.pics.length ? "PIC: " + p.pics.join(", ") : "Belum ada PIC"}</small></div>
+              <div className="port-cnt" title={`${p.completedActivities} selesai dari ${p.totalActivities} aktivitas`}>{p.completedActivities}<span className="muted">/{p.totalActivities}</span></div>
+              <div className="port-score"><Bar value={prog} tone={tone === "ok" ? "ok" : ""} />
+                <b>{p.totalActivities ? prog + "%" : <span className="muted" title="Belum ada aktivitas">–</span>}</b></div>
+              <span className={"pill " + tone}>{label}</span>
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }

@@ -37,6 +37,9 @@ export const PROGRAMS = [
     desc: "Sekolah Maung (Sekolah Manusia Unggul) 2026 merupakan program Dinas Pendidikan Provinsi Jawa Barat melalui Bidang Guru dan Tenaga Kependidikan, yang diselenggarakan sebagai langkah awal penyiapan SMA dan SMK Manusia Unggul di Jawa Barat. Program ini merupakan salah satu upaya Pemerintah Provinsi Jawa Barat dalam memastikan kesiapan pendidik untuk mewujudkan generasi yang unggul, berkarakter, dan berdaya saing global. Melalui program ini, 2.946 guru pada 41 SMA/SMK Manusia Unggul diases dan dipetakan kompetensinya, meliputi pedagogi, penguasaan substansi, kepemimpinan, serta karakter berlandaskan filosofi Pancawaluya. Hasil asesmen menjadi dasar penyusunan rencana pengembangan kompetensi bagi setiap guru." },
 ];
 
+// Total program DITSAMA = program monitoring + SUGT (dipantau di luar sistem ini, lihat SUGT_URL)
+export const TOTAL_PROGRAMS = PROGRAMS.length + 1;
+
 // Daftar program KHUSUS menu Keuangan (boleh beda dari program monitoring)
 export const FIN_PROGRAMS = [
   { api: "siap_itb",           label: "SIAP ITB" },

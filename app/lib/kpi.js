@@ -44,11 +44,11 @@ export const KPI = {
 
   // ------------------------------------------------------------ kemajuan ---
   progress: {
-    title: "Kemajuan Keseluruhan",
-    arti: "Persentase kegiatan yang sudah selesai.",
-    rumus: "Jumlah kegiatan Selesai ÷ jumlah seluruh kegiatan × 100%.",
+    title: "Program Selesai",
+    arti: "Jumlah program yang seluruh aktivitasnya sudah selesai, dibanding total program DITSAMA.",
+    rumus: "Jumlah program Selesai ÷ total program (10, termasuk SUGT) × 100%. Keterangan di bawah bar: aktivitas Selesai ÷ seluruh aktivitas.",
     skor: STATUS_KEGIATAN,
-    catatan: "Agenda mendatang yang belum bertanggal dihitung Akan Datang; kegiatan lain tanpa tanggal dihitung Berlangsung.",
+    catatan: "Program dihitung Selesai bila punya aktivitas dan semuanya Selesai. SUGT dipantau di luar sistem ini sehingga belum terhitung. Ikut filter yang dipilih.",
   },
   programProgress: {
     title: "Kemajuan Program",
@@ -57,7 +57,7 @@ export const KPI = {
     skor: STATUS_KEGIATAN,
   },
   lastActivity: {
-    title: "Kegiatan Terakhir",
+    title: "Aktivitas Terakhir",
     arti: "Kegiatan paling baru yang tanggalnya hari ini atau sebelumnya.",
     rumus: "Diambil dari kegiatan bertanggal paling akhir yang sudah lewat atau sedang berjalan; uraiannya disusun dari data yang diisi (lokasi, fase, kehadiran, nilai, keberjalanan, isu).",
     catatan: "Klik nama kegiatan untuk melihat rincian lengkapnya.",
@@ -70,6 +70,13 @@ export const KPI = {
     rumus: "Hitung kegiatan Selesai ÷ hitung seluruh kegiatan program tersebut.",
     catatan: "Ini progres (kuantitas), bukan Nilai Kinerja.",
   },
+  programPercent: {
+    title: "Progres",
+    arti: "Persentase aktivitas program yang sudah selesai.",
+    rumus: "Aktivitas Selesai ÷ seluruh aktivitas program × 100%.",
+    skor: STATUS_KEGIATAN,
+    catatan: "Program tanpa aktivitas ditampilkan “–”.",
+  },
   performanceScore: {
     title: "Nilai Kinerja",
     arti: "Kualitas pelaksanaan program secara keseluruhan.",
@@ -78,9 +85,9 @@ export const KPI = {
   },
   status: {
     title: "Status Program",
-    arti: "Indikator warna dari Nilai Kinerja.",
-    rumus: "Ditentukan dari Nilai Kinerja program.",
-    skor: [["On Track", "≥ 80%"], ["Attention", "60% – 79%"], ["Critical", "< 60%"]],
+    arti: "Tahap pelaksanaan program.",
+    rumus: "Ditentukan dari status aktivitas program.",
+    skor: [["Selesai", "semua aktivitas Selesai"], ["Sedang berlangsung", "ada aktivitas Selesai atau Berlangsung"], ["Belum dilaksanakan", "belum ada aktivitas yang Selesai atau Berlangsung"]],
   },
 
   // ---------------------------------------------------- analisis peserta ---

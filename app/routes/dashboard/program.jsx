@@ -39,7 +39,8 @@ function ProgramPage({ loaderData }) {
       <ProgramAbout program={program} />
       {!d ? <><div className="grid g-2"><SkeletonCard /><SkeletonCard /></div></> : (
         <>
-          <ProgressSummary label="Kemajuan Program" info="programProgress" progress={d.kpi.progress} kpi={d.kpi} last={lastPerformed(d.activities)} />
+          <ProgressSummary label="Kemajuan Program" info="programProgress" progress={d.kpi.progress} kpi={d.kpi} last={lastPerformed(d.activities)}
+            note={`${d.kpi.totalDone} dari ${d.kpi.totalActivities} total aktivitas program selesai`} />
           <div className="grid g-2">
             <MilestoneCard title="Sedang Berlangsung" info="ongoing" tone="red" items={d.milestones.ongoing} program={program}
               empty="Tidak ada kegiatan dalam rentang H-2 sampai H+7." />

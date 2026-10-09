@@ -529,7 +529,7 @@ dialog.confirm[open]{animation:pop .2s var(--ease)}
 .perf-lab small{display:block;font-size:11.5px;font-weight:500;color:var(--muted)}
 .perf-val{text-align:right;font-size:15px;color:var(--navy);font-variant-numeric:tabular-nums}
 .port{list-style:none;margin:0;padding:0}
-.port li{display:grid;grid-template-columns:10px minmax(0,1fr) 104px minmax(70px,130px) 136px;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.port li{display:grid;grid-template-columns:10px minmax(0,1fr) 98px minmax(64px,120px) 136px minmax(64px,110px);align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
 .port li .pill,.port-st{justify-self:end}
 .port .port-head{padding:0 0 8px;font-size:12px;font-weight:700;color:var(--muted)}
 .port-head>span{display:flex;align-items:center;gap:2px;white-space:nowrap}
@@ -541,7 +541,10 @@ dialog.confirm[open]{animation:pop .2s var(--ease)}
 .port-nm b{display:block;font-size:13.5px}
 .port-nm small{display:block;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .port-cnt{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
-.port-score{display:flex;align-items:center;gap:8px}
+.port-score,.port-perf{display:flex;align-items:center;gap:8px}
+.port-perf .meter{flex:1}
+.port-perf b{font-size:13px;font-variant-numeric:tabular-nums;min-width:36px;text-align:right}
+.port-perf small{display:none}
 .port-score .meter{flex:1}
 .port-score b{font-size:13px;font-variant-numeric:tabular-nums;min-width:36px;text-align:right}
 .lv-counts{display:flex;gap:4px}
@@ -749,7 +752,7 @@ dialog.confirm[open]{animation:pop .2s var(--ease)}
   .cal-dots{display:flex}
   .cal-grid{gap:4px}
   .name-list{columns:1}
-  /* baris 1: titik · nama/PIC · status — baris 2: skor · jumlah kegiatan */
+  /* baris 1: titik · nama/PIC · status — baris 2: progres · jumlah kegiatan — baris 3: performa */
   .port li{grid-template-columns:10px minmax(0,1fr) 132px;column-gap:10px;row-gap:8px;padding:12px 0}
   .port .port-head{display:flex;flex-wrap:wrap;gap:2px 14px;padding:0 0 8px}
   .port-head>span:first-child,.port-head>span:nth-child(2){display:none}
@@ -759,6 +762,8 @@ dialog.confirm[open]{animation:pop .2s var(--ease)}
   .port li .pill{grid-column:3;grid-row:1;align-self:start;justify-self:end}
   .port-score{grid-column:2;grid-row:2}
   .port-cnt{grid-column:3;grid-row:2;font-size:12.5px}
+  .port-perf{grid-column:2 / 4;grid-row:3}
+  .port-perf small{display:block;font-size:11.5px;font-weight:600;color:var(--muted);min-width:56px}
 
   .toasts{left:12px;right:12px;bottom:12px;align-items:stretch}
   .toast{max-width:none}

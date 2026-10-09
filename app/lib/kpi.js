@@ -84,6 +84,13 @@ export const KPI = {
     rumus: "Langkah 1, per kegiatan: rata-rata komponen yang terisi (Nilai Capaian, Kehadiran, Umpan Balik, skor Keberjalanan, skor Isu). Langkah 2: rata-rata Nilai Kinerja semua kegiatan program (maks. 100%).",
     catatan: "Skor Isu selalu ada (tanpa isu = 100%), jadi kegiatan yang belum diisi apa pun tetap bernilai 100% dan bisa menaikkan Nilai Kinerja.",
   },
+  programPerformance: {
+    title: "Performa",
+    arti: "Kualitas pelaksanaan program, dirangkum jadi satu angka.",
+    rumus: "Rata-rata 5 indikator Performa kegiatan program tersebut: Nilai Capaian Peserta, Performa Kehadiran Peserta, Performa Keberjalanan Aktivitas, Umpan Balik Peserta, dan Nilai Isu & Peringatan.",
+    skor: [["Baik (hijau)", "≥ 80%"], ["Perlu perhatian (kuning)", "60% – 79%"], ["Kritis (merah)", "< 60%"]],
+    catatan: "Indikator yang belum diisi kegiatan mana pun tidak ikut dirata-rata, mis. (100 + 75 + 90) ÷ 3 = 88%. Program tanpa aktivitas ditampilkan “–”. Angkanya sama dengan rata-rata kartu Performa kegiatan saat program itu difilter.",
+  },
   status: {
     title: "Status Program",
     arti: "Tahap pelaksanaan program.",

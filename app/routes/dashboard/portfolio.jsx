@@ -150,7 +150,7 @@ function PortfolioList({ items, program }) {
   return (
     <section className="card">
       <div className="card-head"><div><h2 className="card-title">Kinerja Portofolio Program</h2>
-        <div className="card-sub">Progres = aktivitas selesai / total aktivitas program</div></div></div>
+        <div className="card-sub">Progres = aktivitas selesai / total aktivitas · Performa = rata-rata indikator performa program</div></div></div>
       <ul className="port">
         <li className="port-head">
           <span />
@@ -158,10 +158,12 @@ function PortfolioList({ items, program }) {
           <span className="port-cnt">Selesai / Total<InfoTip k="completedTotal" /></span>
           <span>Progres<InfoTip k="programPercent" /></span>
           <span className="port-st">Status<InfoTip k="status" /></span>
+          <span>Performa<InfoTip k="programPerformance" /></span>
         </li>
         {rows.map((p) => {
           const [label, tone] = programStatus(p);
           const prog = pct(p.completedActivities, p.totalActivities);
+          const perf = p.totalActivities ? p.performance ?? null : null;
           return (
             <li key={p.program}>
               <span className="port-dot" style={{ background: progColor(p.program) }} />
@@ -170,6 +172,9 @@ function PortfolioList({ items, program }) {
               <div className="port-score"><Bar value={prog} tone={tone === "ok" ? "ok" : ""} />
                 <b>{p.totalActivities ? prog + "%" : <span className="muted" title="Belum ada aktivitas">–</span>}</b></div>
               <span className={"pill " + tone}>{label}</span>
+              <div className="port-perf"><small>Performa</small>
+                <Bar value={perf} tone={perf == null ? "" : perf < 60 ? "crit" : perf < 80 ? "warn" : "ok"} />
+                <b>{perf == null ? <span className="muted" title="Belum ada indikator terisi">–</span> : perf + "%"}</b></div>
             </li>
           );
         })}
